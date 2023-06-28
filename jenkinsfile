@@ -1,48 +1,46 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Checkout') {
             steps {
                 // Récupérer le code source depuis le dépôt GitHub
-                git 'https://github.com/freesavior/Pipline-CICD.git'
+                git branch: '*/main', url: 'https://github.com/freesavior/Pipline-CICD.git'
             }
         }
-        
+
         stage('Build') {
             steps {
                 // Construire l'image Docker
                 script {
-                    docker.withRegistry('https://python-app-registry', '3705ff2c-1d88-4274-893e-f646d05cf025') {
-                        def customImage = docker.build("votre_image:latest", "--build-arg PYTHON_VERSION=3.9 .")
-                        customImage.push()
-                    }
+                    docker.build("python-app:latest", "--build-arg PYTHON_VERSION=3.9 .")
                 }
             }
         }
-        
+
         stage('Test') {
             steps {
                 // Exécuter les tests unitaires
-                sh 'docker run --rm votre_image:latest python -m unittest discover'
+                sh 'docker run --rm python-app:latest python -m unittest discover'
             }
         }
-        
+
         stage('Push to Docker Registry') {
             steps {
-                // Poussez l'image Docker vers le registre
+                // Poussez l'image Docker vers un registre
                 withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD python-app-registry'
-                    sh 'docker push votre_image:latest'
+                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                    sh 'docker tag python-app:latest python-app-registry/python-app:latest'
+                    sh 'docker push python-app-registry/python-app:latest'
                 }
             }
         }
-        
+
         stage('Deploy to Minikube') {
             steps {
                 // Déployer l'application sur Minikube en utilisant ArgoCD
-                sh 'argocd app create votre_application --repo https://github.com/freesavior/Pipline-CICD.git --path kubernetes --dest-namespace default --dest-server https://kubernetes.default.svc'
-                sh 'argocd app sync votre_application'
+                sh 'kubectl apply -f deployment.yaml'
+                
             }
         }
     }
