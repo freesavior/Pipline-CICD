@@ -1,14 +1,15 @@
-# Utilisation de l'image Python 3.9 comme base
+# Utilisez une image de base appropriée
 FROM python:3.9
 
-# Copie des fichiers de l'application dans le conteneur
-COPY . /app
-
-# Définition du répertoire de travail
+# Définissez le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Installation des dépendances
+# Copiez les fichiers de votre application dans le conteneur
+COPY . /app
+
+# Installez les dépendances nécessaires
 RUN pip install -r requirements.txt
 
-# Commande pour exécuter l'application
-CMD [ "python", "app.py" ]
+# Définissez la commande pour exécuter votre application
+CMD [ "python", "main.py" ]
+
