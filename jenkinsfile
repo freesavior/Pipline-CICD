@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Récupérer le code source depuis le dépôt GitHub
-                git branch: '*/main', url: 'https://github.com/freesavior/Pipline-CICD.git'
+                git branch: 'main', url: 'https://github.com/freesavior/Pipline-CICD.git'
             }
         }
 
