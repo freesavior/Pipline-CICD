@@ -1,0 +1,2 @@
+# Dépendances pour l'application de gestion de dossiers aucune dépendance supplémentaire n'est requise en dehors des bibliothèques Python standard. Par conséquent, le fichier requirements.txt est vide.
+
