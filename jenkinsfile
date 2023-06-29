@@ -28,15 +28,21 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                    sh 'docker tag python-app:latest python-app-registry/python-app:latest'
-                    sh 'docker push python-app-registry/python-app:latest'
+                    sh 'docker tag python-app:latest lesavoir/python-app-registry:latest'
+                    sh 'docker push lesavoir/python-app-registry:latest'
                 }
             }
         }
 
-        stage('Deploy to Minikube') {
+        stage('Deploy to Kubernetes') {
             steps {
                 sh 'kubectl apply -f deployment.yaml'
+            }
+        }
+
+        stage('Sync with ArgoCD') {
+            steps {
+                sh 'argocd app sync python-app-project'
             }
         }
     }
