@@ -1,17 +1,17 @@
 pipeline {
-    agent any
+    agent {
+        label 'docker'
+    }
 
     stages {
         stage('Checkout') {
             steps {
-                // Récupérer le code source depuis le dépôt GitHub
                 git branch: 'main', url: 'https://github.com/freesavior/Pipline-CICD.git'
             }
         }
 
         stage('Build') {
             steps {
-                // Construire l'image Docker
                 script {
                     docker.build("python-app:latest", "--build-arg PYTHON_VERSION=3.9 .")
                 }
@@ -20,14 +20,12 @@ pipeline {
 
         stage('Test') {
             steps {
-                // Exécuter les tests unitaires
                 sh 'docker run --rm python-app:latest python -m unittest discover'
             }
         }
 
         stage('Push to Docker Registry') {
             steps {
-                // Poussez l'image Docker vers un registre
                 withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
                     sh 'docker tag python-app:latest python-app-registry/python-app:latest'
@@ -38,9 +36,7 @@ pipeline {
 
         stage('Deploy to Minikube') {
             steps {
-                // Déployer l'application sur Minikube en utilisant ArgoCD
                 sh 'kubectl apply -f deployment.yaml'
-                
             }
         }
     }
