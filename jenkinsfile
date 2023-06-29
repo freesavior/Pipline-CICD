@@ -13,7 +13,10 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    docker.build("python-app:latest", "--build-arg PYTHON_VERSION=3.9 .")
+                    docker.withRegistry('https://hub.docker.com/repository/docker/lesavoir/python-app-registry', '3705ff2c-1d88-4274-893e-f646d05cf025') {
+                        def dockerImage = docker.build("python-app:latest", "--build-arg PYTHON_VERSION=3.9 .")
+                        dockerImage.push('lesavoir/python-app-registry:latest')
+                    }
                 }
             }
         }
@@ -36,7 +39,8 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f deployments/kubernetes/deployment.yaml'
+                sh 'kubectl apply -f deployments/kubernetes/service.yaml'
             }
         }
 
